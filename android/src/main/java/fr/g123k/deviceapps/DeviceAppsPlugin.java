@@ -41,9 +41,7 @@ import static fr.g123k.deviceapps.utils.DrawableUtils.getBitmapFromDrawable;
 /**
  * DeviceAppsPlugin
  */
-public class DeviceAppsPlugin implements
-        FlutterPlugin,
-        MethodCallHandler {
+public class DeviceAppsPlugin implements FlutterPlugin, MethodCallHandler {
 
     private final int SYSTEM_APP_MASK = ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
 
@@ -149,8 +147,6 @@ public class DeviceAppsPlugin implements
 
     private boolean openApp(@NonNull String packageName) {
         Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(packageName);
-
-        // Null pointer check in case package name was not found
         if (launchIntent != null) {
             context.startActivity(launchIntent);
             return true;
