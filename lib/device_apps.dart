@@ -17,21 +17,21 @@ class DeviceApps {
   /// To get the icon you have to cast the object to [ApplicationWithIcon]
   /// [onlyAppsWithLaunchIntent] will only list applications when an entrypoint.
   /// It is similar to what a launcher will display
-  static Future<List<Application>> getInstalledApplications(
-      {bool includeSystemApps: false,
+  static Future<List<Application>?> getInstalledApplications(
+      { bool includeSystemApps: false,
       bool includeAppIcons: false,
       bool onlyAppsWithLaunchIntent: false}) async {
     return _channel.invokeMethod('getInstalledApps', <String, bool>{
       'system_apps': includeSystemApps,
       'include_app_icons': includeAppIcons,
       'only_apps_with_launch_intent': onlyAppsWithLaunchIntent
-    }).then((Object apps) {
+    }).then((Object? apps) {
       if (apps != null && apps is List) {
-        List<Application> list = List<Application>();
+        List<Application>? list ;
         for (Object app in apps) {
-          if (app is Map) {
+          if (app is Map<Object,Object>) {
             try {
-              list.add(Application._(app));
+              list?.add(Application._(app));
             } catch (e) {
               if (e is AssertionError) {
                 print('[DeviceApps] Unable to add the following app: $app');
@@ -44,18 +44,18 @@ class DeviceApps {
 
         return list;
       } else {
-        return List<Application>(0);
+        return null;
       }
     }).catchError((Object err) {
       print(err);
-      return List<Application>(0);
+      return null;
     });
   }
 
   /// Provide all information for a given app by its [packageName]
   /// [includeAppIcon] will also include the icon for the app.
   /// To get it, you have to cast the object to [ApplicationWithIcon].
-  static Future<Application> getApp(String packageName,
+  static Future<Application?> getApp(String packageName,
       [bool includeAppIcon = false]) async {
     if (packageName.isEmpty) {
       throw Exception('The package name can not be empty');
@@ -64,8 +64,8 @@ class DeviceApps {
     return _channel.invokeMethod('getApp', <String, Object>{
       'package_name': packageName,
       'include_app_icon': includeAppIcon
-    }).then((Object app) {
-      if (app != null && app is Map) {
+    }).then((Object? app) {
+      if (app != null && app is Map<Object,Object>) {
         return Application._(app);
       } else {
         return null;
@@ -78,7 +78,7 @@ class DeviceApps {
 
   /// Returns whether a given [packageName] is installed on the device
   /// You will then receive in return a boolean
-  static Future<bool> isAppInstalled(String packageName) {
+  static Future<bool?> isAppInstalled(String packageName) {
     if (packageName.isEmpty) {
       throw Exception('The package name can not be empty');
     }
@@ -160,16 +160,16 @@ class Application {
         assert(map['system_app'] != null),
         assert(map['install_time'] != null),
         assert(map['update_time'] != null),
-        appName = map['app_name'],
-        apkFilePath = map['apk_file_path'],
-        packageName = map['package_name'],
-        versionName = map['version_name'],
-        versionCode = map['version_code'],
-        dataDir = map['data_dir'],
-        systemApp = map['system_app'],
-        installTimeMillis = map['install_time'],
-        updateTimeMillis = map['update_time'],
-        category = _parseCategory(map['category']);
+        appName = map['app_name'].toString(),
+        apkFilePath = map['apk_file_path'].toString(),
+        packageName = map['package_name'].toString(),
+        versionName = map['version_name'].toString(),
+        versionCode = int.parse(map['version_code'].toString()),
+        dataDir = map['data_dir'].toString(),
+        systemApp = bool.fromEnvironment(map['system_app'].toString()),
+        installTimeMillis = int.parse(map['install_time'].toString()) ,
+        updateTimeMillis = int.parse(map['update_time'].toString()),
+        category = _parseCategory(map['category'].toString());
 
   /// Mapping of Android categories
   /// [https://developer.android.com/reference/kotlin/android/content/pm/ApplicationInfo]
@@ -263,7 +263,7 @@ class ApplicationWithIcon extends Application {
 
   ApplicationWithIcon._fromMap(Map<Object, Object> map)
       : assert(map['app_icon'] != null),
-        _icon = map['app_icon'],
+        _icon = map['app_icon'].toString(),
         super._fromMap(map);
 
   /// Icon of the application to use in conjunction with [Image.memory]
